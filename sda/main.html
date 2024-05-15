@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Магазин</title>
+</head>
+<body>
+    <h1>Добро пожаловать в магазин!</h1>
+    <p>Выберите товар:</p>
+    <button onclick="buyItem(1)">Товар 1 - 100 руб.</button>
+    <button onclick="buyItem(2)">Товар 2 - 200 руб.</button>
+    <button onclick="buyItem(3)">Товар 3 - 300 руб.</button>
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        function buyItem(item) {
+            // Отправляем запрос на сервер для покупки товара
+            axios.post('/buy', { item: item })
+            .then(response => {
+                console.log(response.data);
+                alert(response.data.message);
+            })
+            .catch(error => {
+                console.error(error);
+            });
+        }
+
+        const express = require('express');
+        const axios = require('axios');
+
+        const app = express();
+        const port = 3000;
+
+        // Прослушивание POST-запросов от веб-приложения
+        app.use(express.json());
+        app.post('/buy', (req, res) => {
+            const { item } = req.body;
+            const chatId = 'YOUR_CHAT_ID';
+            const token = 'YOUR_TELEGRAM_BOT_TOKEN';
+
+            // Отправка сообщения через API Telegram
+            axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
+                chat_id: chatId,
+                text: `Пользователь заказал товар ${item}`
+            })
+            .then(response => {
+                res.json({ message: 'Товар успешно заказан' });
+            })
+            .catch(error => {
+                console.error(error);
+                res.status(500).json({ message: 'Произошла ошибка' });
+            });
+        });
+
+        // Запуск сервера
+        app.listen(port, () => {
+            console.log(`Сервер запущен на порту ${port}`);
+        });
+
+    </script>
+</body>
+</html>
